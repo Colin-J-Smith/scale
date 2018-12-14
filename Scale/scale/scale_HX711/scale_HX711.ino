@@ -2,7 +2,7 @@
 #include <HX711.h>
 #define DOUT 2
 #define CLK 3
-#define NUMSAMPLES 10
+#define NUMSAMPLES 2
 #define calibration_factor 10530.0
 
 HX711 scale(DOUT,CLK);

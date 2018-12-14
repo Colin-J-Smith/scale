@@ -3,7 +3,7 @@ from tkinter import Tk, Label, Button, Entry, DoubleVar, StringVar, END, W, E
 import serial
 import serial.tools.list_ports
 from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk)
+    FigureCanvasTkAgg, NavigationToolbar2TkAgg)
 # Implement the default Matplotlib key bindings.
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
@@ -50,7 +50,7 @@ class PedalGUI:
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
         
-        toolbar = NavigationToolbar2Tk(self.canvas, root)
+        toolbar = NavigationToolbar2TkAgg(self.canvas, root)
         toolbar.update()
         self.canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
         
@@ -68,7 +68,9 @@ class PedalGUI:
         self.quit_button.pack(side=tkinter.BOTTOM)
         
         #Connect the Fio
+#        ports = list(serial.tools.list_ports.comports())
         ports = list(serial.tools.list_ports.comports())
+
         for p in ports:
             if "Fio" in p[1]: # if the device is found (by name)
                 #open a xbee device on the current port
