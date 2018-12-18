@@ -2,17 +2,20 @@ import tkinter
 from tkinter import Tk, Label, Button, Entry, DoubleVar, StringVar, END, W, E
 import serial
 import serial.tools.list_ports
+
 from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2TkAgg)
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
 # Implement the default Matplotlib key bindings.
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
+
+import sys
 import time
 import numpy as np
 import threading
 
 
-class PedalGUI:
+class GUI:
 
     def __init__(self, master):
         self.master = master
@@ -43,14 +46,13 @@ class PedalGUI:
 
         # Graph Display        
         self.fig = Figure(figsize=(5, 4), dpi=100)
-        t = np.arange(0, 3, .01)
-        self.fig.add_subplot(111).plot(t, 2 * np.sin(2 * np.pi * t))
+        self.plot = self.fig.add_subplot(111)
         
         self.canvas = FigureCanvasTkAgg(self.fig, master=root)  # A tk.DrawingArea.
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
         
-        toolbar = NavigationToolbar2TkAgg(self.canvas, root)
+        toolbar = NavigationToolbar2Tk(self.canvas, root)
         toolbar.update()
         self.canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
         
@@ -70,25 +72,35 @@ class PedalGUI:
         #Connect the Fio
 #        ports = list(serial.tools.list_ports.comports())
         ports = list(serial.tools.list_ports.comports())
-
         for p in ports:
+            print(p[1])
             if "Fio" in p[1]: # if the device is found (by name)
                 #open a xbee device on the current port
                 self.serial_device = serial.Serial(p[0], 9600)
 
                 # update the log
                 self.update_log("Arduino Connected")
-                self.thread = threading.Thread(target=self.collect_data)
+                #start data collection in it's own thread
+                self.thread = threading.Thread(target=self.read_data)
+                self.read = True
+#                self.read_data()
                 self.thread.start()
                 return
             else:
                 self.update_log("No Arduino Found")    
                 print("No Arduino Found")
+                return
         
     def _quit(self):
+        self.read = False
         self.master.quit()     # stops mainloop
         self.master.destroy()  # this is necessary on Windows to prevent
-                        # Fatal Python Error: PyEval_RestoreThread: NULL tstate
+        try: 
+            self.serial_device.close()
+        except:
+            pass
+        return
+    
     def start(self):
         print('start')
         self.load_array = []
@@ -100,26 +112,28 @@ class PedalGUI:
     def stop(self):
         print('stop')
         self.collect = False
-        self.thread.exit()
         # SAVE DATA TO CSV
         return   
 
     # Define function for when data is recieved
-    def collect_data(self):
-        while True:
+    def read_data(self):
+        while self.read:
             if self.serial_device.in_waiting:
                 #update the GUI with the new value
                 self.load = float(self.serial_device.readline())
                 self.load_var.set(self.load)
                 
-                if self.collect:
+                if self.collect: # if we are collecting data
                     self.time_array.append(time.time() - self.t0)
                     self.load_array.append(self.load)
                     self.update_plot()
+        # close the thread
+        sys.exit()
         return
 
     def update_plot(self):
-        self.fig.subplots().plot(self.time_array, self.load_array)
+        self.plot.clear()
+        self.plot.plot(self.time_array, self.load_array)
         self.canvas.draw()
         return
         
@@ -130,9 +144,9 @@ class PedalGUI:
 
 
 root = Tk()
-my_gui = PedalGUI(root)
+my_gui = GUI(root)
 root.mainloop()
 
 # Exit Script
-my_gui.serial_device.close()
+
 

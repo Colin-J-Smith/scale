@@ -14,7 +14,7 @@ float sample_avg = 1;
 
 void setup() {
  Serial.begin(9600);
- Serial1.begin(9600);
+// Serial1.begin(9600);
  scale.tare();  //Reset the scale to 0
  scale.set_scale(calibration_factor); //Adjust to this calibration factor
  delay(2500);
@@ -37,7 +37,7 @@ void loop() {
   sample_avg = sample_sum/NUMSAMPLES; //Value in lbs
 
   Serial.println(sample_avg);
-  Serial1.println(sample_avg);
+//  Serial1.println(sample_avg);
 
 }
 
