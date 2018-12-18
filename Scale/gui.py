@@ -8,18 +8,20 @@ from matplotlib.backends.backend_tkagg import (
 # Implement the default Matplotlib key bindings.
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
+from matplotlib import style
 
 import sys
+import csv
 import time
-import numpy as np
 import threading
 
+style.use("ggplot")
 
 class GUI:
 
     def __init__(self, master):
         self.master = master
-        master.title("Pedal Force GUI")
+        master.title("Digital Load Cell")
         
         self.collect = False
 
@@ -112,8 +114,16 @@ class GUI:
     def stop(self):
         print('stop')
         self.collect = False
+        self.save()
         # SAVE DATA TO CSV
         return   
+    
+    def save(self):
+        myData = [self.time_array, self.load_array]  
+        myFile = open('data.csv', 'w')  
+        with myFile:  
+           writer = csv.writer(myFile)
+           writer.writerows(myData)
 
     # Define function for when data is recieved
     def read_data(self):
@@ -122,7 +132,7 @@ class GUI:
                 #update the GUI with the new value
                 self.load = float(self.serial_device.readline())
                 self.load_var.set(self.load)
-                
+
                 if self.collect: # if we are collecting data
                     self.time_array.append(time.time() - self.t0)
                     self.load_array.append(self.load)
