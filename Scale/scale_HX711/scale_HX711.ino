@@ -1,9 +1,9 @@
 
 #include <HX711.h>
-#define DOUT 2
-#define CLK 3
+#define DOUT 3
+#define CLK 2
 #define NUMSAMPLES 2
-#define calibration_factor 10530.0
+#define calibration_factor 1.0
 
 HX711 scale(DOUT,CLK);
 
@@ -40,4 +40,3 @@ void loop() {
 //  Serial1.println(sample_avg);
 
 }
-
