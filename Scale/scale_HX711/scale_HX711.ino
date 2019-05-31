@@ -5,7 +5,8 @@
 #define NUMSAMPLES 2
 #define calibration_factor 1.0
 
-HX711 scale(DOUT,CLK);
+HX711 scale;
+
 
 int samples[NUMSAMPLES];
 uint8_t i;
@@ -15,6 +16,7 @@ float sample_avg = 1;
 void setup() {
  Serial.begin(9600);
 // Serial1.begin(9600);
+ scale.begin(DOUT,CLK);
  scale.tare();  //Reset the scale to 0
  scale.set_scale(calibration_factor); //Adjust to this calibration factor
  delay(2500);
